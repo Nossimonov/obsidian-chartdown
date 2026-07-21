@@ -61,3 +61,5 @@ jobs:
             chartdown/packages/obsidian/dist/styles.css \
             --title "$V" \
             --notes "Chartdown plugin $V — built from Nossimonov/Chartdown@${{ inputs.ref }}. See the [Chartdown changelog](https://github.com/Nossimonov/Chartdown/blob/main/CHANGELOG.md)."
+
+# (workflow indexing nudge)
