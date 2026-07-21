@@ -1,0 +1,63 @@
+# Builds the plugin from the Chartdown monorepo (the single source of truth)
+# and cuts a release the Obsidian community store can consume: tag = exact
+# manifest version (no v prefix), with main.js / manifest.json / styles.css
+# as individual assets, and the root manifest.json + versions.json synced.
+name: Release plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Chartdown monorepo ref to build (branch, tag, or SHA)
+        default: main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Nossimonov/Chartdown
+          ref: ${{ inputs.ref }}
+          path: chartdown
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+        working-directory: chartdown
+      - run: npm run build
+        working-directory: chartdown
+      - run: npm test
+        working-directory: chartdown
+      - id: version
+        run: echo "version=$(node -p "require('./chartdown/packages/obsidian/manifest.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Sync root manifest.json and versions.json
+        run: |
+          cp chartdown/packages/obsidian/dist/manifest.json manifest.json
+          node -e "
+            const fs = require('fs');
+            const m = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+            const versions = fs.existsSync('versions.json') ? JSON.parse(fs.readFileSync('versions.json', 'utf8')) : {};
+            versions[m.version] = m.minAppVersion;
+            fs.writeFileSync('versions.json', JSON.stringify(versions, null, 2) + '\n');
+          "
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add manifest.json versions.json
+          git diff --cached --quiet || git commit -m "Release ${{ steps.version.outputs.version }}"
+          git push
+      - name: Create the release (tag = exact version, per Obsidian guidelines)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          gh release create "$V" \
+            chartdown/packages/obsidian/dist/main.js \
+            chartdown/packages/obsidian/dist/manifest.json \
+            chartdown/packages/obsidian/dist/styles.css \
+            --title "$V" \
+            --notes "Chartdown plugin $V — built from Nossimonov/Chartdown@${{ inputs.ref }}. See the [Chartdown changelog](https://github.com/Nossimonov/Chartdown/blob/main/CHANGELOG.md)."
