@@ -1,0 +1,32 @@
+.chartdown-toolbar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.chartdown-toolbar button {
+  font-size: var(--font-ui-smaller);
+  padding: 2px 10px;
+  cursor: pointer;
+}
+
+.chartdown-mode-toggle[aria-pressed="true"] {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.chartdown-map {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chartdown-diagnostics {
+  color: var(--text-error);
+  font-size: 0.85em;
+  font-family: var(--font-monospace);
+  margin-top: 0.5em;
+  padding: 0.5em 0.75em;
+  border-left: 2px solid var(--text-error);
+  background: var(--background-secondary);
+}
