@@ -1,12 +1,14 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "paths": {
-      "@chartdown/core": ["../core/src/index"],
-      "@chartdown/render-svg": ["../render-svg/src/index"]
-    }
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "declaration": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

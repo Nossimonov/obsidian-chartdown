@@ -43,8 +43,10 @@ jobs:
         run: |
           rm -rf src
           cp -r chartdown/packages/obsidian/src src
+          # Test scaffolding stays behind: the shim exists to fake Obsidian's
+          # DOM helpers under happy-dom and is not plugin source.
+          rm -f src/obsidian-dom-shim.ts
           cp chartdown/packages/obsidian/styles.css styles.css
-          cp chartdown/packages/obsidian/tsconfig.json tsconfig.json
           cp chartdown/packages/obsidian/dist/manifest.json manifest.json
           node -e "
             const fs = require('fs');

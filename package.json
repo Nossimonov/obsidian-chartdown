@@ -1,0 +1,10 @@
+{
+  "name": "obsidian-chartdown",
+  "private": true,
+  "description": "Obsidian plugin: render Chartdown map blocks as SVG in your notes. Built from the Chartdown monorepo; see README.",
+  "license": "MIT",
+  "devDependencies": {
+    "obsidian": "^1.13.1",
+    "typescript": "^5.6.0"
+  }
+}
