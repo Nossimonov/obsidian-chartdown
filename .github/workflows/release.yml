@@ -1,7 +1,9 @@
 # Builds the plugin from the Chartdown monorepo (the single source of truth)
 # and cuts a release the Obsidian community store can consume: tag = exact
 # manifest version (no v prefix), with main.js / manifest.json / styles.css
-# as individual assets, and the root manifest.json + versions.json synced.
+# as individual assets carrying build-provenance attestations, and the root
+# manifest.json + versions.json + src/ synced (the store requires source in
+# the repository).
 name: Release plugin
 
 on:
@@ -13,6 +15,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -35,8 +39,12 @@ jobs:
         working-directory: chartdown
       - id: version
         run: echo "version=$(node -p "require('./chartdown/packages/obsidian/manifest.json').version")" >> "$GITHUB_OUTPUT"
-      - name: Sync root manifest.json and versions.json
+      - name: Sync source, manifest.json, and versions.json from the monorepo
         run: |
+          rm -rf src
+          cp -r chartdown/packages/obsidian/src src
+          cp chartdown/packages/obsidian/styles.css styles.css
+          cp chartdown/packages/obsidian/tsconfig.json tsconfig.json
           cp chartdown/packages/obsidian/dist/manifest.json manifest.json
           node -e "
             const fs = require('fs');
@@ -47,9 +55,16 @@ jobs:
           "
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add manifest.json versions.json
+          git add -A
           git diff --cached --quiet || git commit -m "Release ${{ steps.version.outputs.version }}"
           git push
+      - name: Attest build provenance for the release assets
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            chartdown/packages/obsidian/dist/main.js
+            chartdown/packages/obsidian/dist/styles.css
+            chartdown/packages/obsidian/dist/manifest.json
       - name: Create the release (tag = exact version, per Obsidian guidelines)
         env:
           GH_TOKEN: ${{ github.token }}
@@ -61,5 +76,3 @@ jobs:
             chartdown/packages/obsidian/dist/styles.css \
             --title "$V" \
             --notes "Chartdown plugin $V — built from Nossimonov/Chartdown@${{ inputs.ref }}. See the [Chartdown changelog](https://github.com/Nossimonov/Chartdown/blob/main/CHANGELOG.md)."
-
-# (workflow indexing nudge)

@@ -35,7 +35,7 @@ Until the plugin is in the community store: download `main.js`, `manifest.json`,
 
 ## Development
 
-This is the **release repository**: releases are built by CI from the [Chartdown monorepo](https://github.com/Nossimonov/Chartdown) (`packages/obsidian`), which is where the source, tests, and issue tracker live. Please file issues and PRs there.
+Development happens in the [Chartdown monorepo](https://github.com/Nossimonov/Chartdown) (`packages/obsidian`), which is where the tests and issue tracker live — please file issues and PRs there. This repository carries the store-facing artifact: [`src/`](src/) and `styles.css` are synced verbatim from the monorepo by the release workflow (every release commit pins the exact source it was built from), and release assets carry [build-provenance attestations](https://github.com/Nossimonov/obsidian-chartdown/attestations). The plugin imports [`@chartdown/core`](https://www.npmjs.com/package/@chartdown/core) and [`@chartdown/render-svg`](https://www.npmjs.com/package/@chartdown/render-svg), published from the same monorepo.
 
 ## License
 
