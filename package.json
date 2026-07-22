@@ -3,7 +3,11 @@
   "private": true,
   "description": "Obsidian plugin: render Chartdown map blocks as SVG in your notes. Built from the Chartdown monorepo; see README.",
   "license": "MIT",
+  "scripts": {
+    "build": "esbuild src/main.ts --bundle --platform=browser --format=cjs --external:obsidian --outfile=main.js"
+  },
   "devDependencies": {
+    "esbuild": "^0.28.1",
     "@chartdown/core": "^0.2.0",
     "@chartdown/render-svg": "^0.2.0",
     "obsidian": "^1.13.1",
