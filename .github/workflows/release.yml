@@ -50,7 +50,8 @@ jobs:
           cp chartdown/packages/obsidian/dist/manifest.json manifest.json
           node -e "
             const fs = require('fs');
-            const m = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));
+            // BOM-tolerant: Windows tooling occasionally writes one.
+            const m = JSON.parse(fs.readFileSync('manifest.json', 'utf8').replace(/^﻿/, ''));
             const versions = fs.existsSync('versions.json') ? JSON.parse(fs.readFileSync('versions.json', 'utf8')) : {};
             versions[m.version] = m.minAppVersion;
             fs.writeFileSync('versions.json', JSON.stringify(versions, null, 2) + '\n');
