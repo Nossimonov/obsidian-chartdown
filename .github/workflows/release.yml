@@ -43,12 +43,30 @@ jobs:
         run: |
           rm -rf src
           cp -r chartdown/packages/obsidian/src src
-          # Test scaffolding stays behind: the shim exists to fake Obsidian's
-          # DOM helpers under happy-dom and is not plugin source.
+          # Test scaffolding stays behind. The shim fakes Obsidian's DOM helpers
+          # under happy-dom, and the specs import vitest — neither is plugin
+          # source, and the store requires the SOURCE of what ships. Shipping
+          # them means the store's scan type-checks files whose dependencies the
+          # plugin deliberately does not carry.
           rm -f src/obsidian-dom-shim.ts
+          rm -f src/*.test.ts
           cp chartdown/packages/obsidian/styles.css styles.css
           cp chartdown/packages/obsidian/dist/manifest.json manifest.json
           cp chartdown/packages/obsidian/CHANGELOG.md CHANGELOG.md
+          # The @chartdown pins here are what the community-store scan and any
+          # local `tsc` resolve against — the SHIPPED plugin is bundled from the
+          # monorepo workspace and never reads them. So they drift silently, and
+          # the only symptom is a type error on an API that exists upstream:
+          # `locationOf` shipped in 0.4.0 while this pinned ^0.2.0, and the scan
+          # reported an unsafe call rather than a stale dependency.
+          node -e "
+            const fs = require('fs');
+            const v = JSON.parse(fs.readFileSync('chartdown/packages/core/package.json', 'utf8').replace(/^\uFEFF/, '')).version;
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8').replace(/^\uFEFF/, ''));
+            for (const k of Object.keys(pkg.devDependencies)) if (k.startsWith('@chartdown/')) pkg.devDependencies[k] = v;
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+            console.log('pinned @chartdown/* to ' + v);
+          "
           node -e "
             const fs = require('fs');
             // BOM-tolerant: Windows tooling occasionally writes one.
