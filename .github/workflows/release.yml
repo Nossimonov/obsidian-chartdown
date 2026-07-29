@@ -48,6 +48,7 @@ jobs:
           rm -f src/obsidian-dom-shim.ts
           cp chartdown/packages/obsidian/styles.css styles.css
           cp chartdown/packages/obsidian/dist/manifest.json manifest.json
+          cp chartdown/packages/obsidian/CHANGELOG.md CHANGELOG.md
           node -e "
             const fs = require('fs');
             // BOM-tolerant: Windows tooling occasionally writes one.
@@ -68,6 +69,23 @@ jobs:
             chartdown/packages/obsidian/dist/main.js
             chartdown/packages/obsidian/dist/styles.css
             chartdown/packages/obsidian/dist/manifest.json
+      - name: Release notes from this version's own changelog section
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          # THIS version's section, not the whole file: the community store
+          # shows these notes verbatim, and a reader opening a release wants to
+          # know what changed in it.
+          awk -v v="## [$V]" 'index($0,v)==1{f=1;print;next} /^## \[/{f=0} f' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "CHANGELOG.md has no section for $V — a release whose notes say nothing is how users find out their maps changed by noticing" >&2
+            exit 1
+          fi
+          {
+            echo
+            echo "---"
+            echo "Built from Nossimonov/Chartdown@${{ inputs.ref }}."
+          } >> notes.md
+          cat notes.md
       - name: Create the release (tag = exact version, per Obsidian guidelines)
         env:
           GH_TOKEN: ${{ github.token }}
@@ -78,4 +96,4 @@ jobs:
             chartdown/packages/obsidian/dist/manifest.json \
             chartdown/packages/obsidian/dist/styles.css \
             --title "$V" \
-            --notes "Chartdown plugin $V — built from Nossimonov/Chartdown@${{ inputs.ref }}. See the [Chartdown changelog](https://github.com/Nossimonov/Chartdown/blob/main/CHANGELOG.md)."
+            --notes-file notes.md
