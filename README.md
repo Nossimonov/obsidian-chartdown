@@ -29,6 +29,25 @@ party start : J14..L15
 
 Try the language first in the [playground](https://nossimonov.github.io/Chartdown/) — no install, runs in your browser.
 
+
+## Long source? Fold it with a callout
+
+A detailed map is a long fence, and a long fence disrupts the read. Wrap it in a collapsed callout — the `-` after the type is what starts it folded:
+
+````markdown
+> [!note]- Map source (Chartdown)
+> ```chartdown
+> # Garl's Estate
+> map: battlemap
+> grid: square 30x22
+> …
+> ```
+````
+
+The map renders when you expand it, toolbar and all.
+
+**Not `<details>`.** You will see that idiom recommended for GitHub, where it folds properly — but Obsidian does not parse a fence inside a raw HTML block, so the map never renders and you get the source as text ([Chartdown#225](https://github.com/Nossimonov/Chartdown/issues/225)). A callout is the one that works in both, which matters if the same file is read here and on GitHub.
+
 ## Co-write your maps with an AI assistant
 
 Chartdown is plain text, which means any LLM you already use can write it with you: describe the scene in prose ("the estate has a treasury, a ballroom, slave cells below…"), get a ` ```chartdown ` fence back, paste it in your note, and it renders. The plugin ships no AI, no API keys, and makes no network calls — you bring the assistant; you just have to teach it the language once per conversation:
