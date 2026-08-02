@@ -25,6 +25,7 @@ party start : J14..L15
 - **GM/player split, fail-closed** — `hidden` tokens, `[gm]` notes, and triggers render only in GM view. Each map has a toolbar toggle; the settings tab sets the default.
 - **Export SVG** — one click writes the map (in the current view) next to the note and reveals it in your system file explorer.
 - **Export UVTT** — one `.dd2vtt` per map level, with walls, doors, windows, and lights mapped for VTT import (Foundry, Roll20 via importers, Arkenforge, …) and the map image rasterized in-app. Note: `.dd2vtt` files are hidden in Obsidian's own file explorer (unknown extension) — they're real files in your vault folder, and the export reveals them.
+- **`.cd` files open to their map** — keep a map as its own file, not only as a fence inside a note. Opening one shows the rendered map with the same toolbar; a **Source** button swaps to the text, and edits save in place. Exports take the file's own name, so `sunless-hollow.cd` writes `sunless-hollow.svg` beside it. *While this plugin is enabled it claims the `.cd` extension for the vault; disable it and those files go back to being unopenable, since nothing else knows what they are.*
 - **Multi-level battlemaps, themes, light and sight** — the full [Chartdown language](https://github.com/Nossimonov/Chartdown/tree/main/docs/spec).
 
 Try the language first in the [playground](https://nossimonov.github.io/Chartdown/) — no install, runs in your browser.
