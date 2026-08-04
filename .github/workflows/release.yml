@@ -67,6 +67,20 @@ jobs:
             fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
             console.log('pinned @chartdown/* to ' + v);
           "
+          # …and the LOCKFILE has to follow the pins, or the two disagree and
+          # `npm ci` refuses outright: "lock file's @chartdown/core@0.4.0 does
+          # not satisfy @chartdown/core@0.5.0". The store scan installs before
+          # it lints, so a stale lockfile does not merely mis-resolve a type —
+          # nothing installs, every @chartdown import becomes `any`, and the
+          # scan reports hundreds of no-unsafe-* warnings across every file
+          # plus an out-of-date-lockfile error. That is what 0.3.0 hit, and it
+          # was created by the pin rewrite immediately above: 0.2.1 taught us
+          # to move the pins, and moving them without the lockfile is the same
+          # drift wearing the other shoe.
+          #
+          # --package-lock-only: nothing here needs node_modules, and a full
+          # install would fetch a tree the release does not use.
+          npm install --package-lock-only --ignore-scripts
           node -e "
             const fs = require('fs');
             // BOM-tolerant: Windows tooling occasionally writes one.
