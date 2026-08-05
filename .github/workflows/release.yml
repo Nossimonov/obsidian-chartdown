@@ -94,13 +94,30 @@ jobs:
           git add -A
           git diff --cached --quiet || git commit -m "Release ${{ steps.version.outputs.version }}"
           git push
+      # THE RELEASED ARTIFACT IS BUILT FROM THIS REPOSITORY (Chartdown#265).
+      # It used to be the monorepo's bundle, which resolves @chartdown/* to the
+      # WORKSPACE SOURCE — packages/core/src/lex.ts and friends, module by
+      # module — while this repository's pins and lockfile resolve them to the
+      # published package's single dist/index.js. Same logic, different module
+      # granularity, so the two never matched byte for byte and the store's
+      # scan reported the asset as not reproducible from its own source.
+      #
+      # Building here makes the scan's rebuild the thing that shipped. It also
+      # means the plugin bundles the PUBLISHED renderer rather than whatever
+      # the monorepo ref happens to hold, so a renderer fix reaches the plugin
+      # only once it is on npm — which is what the pins in package.json have
+      # been claiming all along.
+      - name: Build the plugin from THIS repository's synced source
+        run: |
+          npm ci
+          npm run build
       - name: Attest build provenance for the release assets
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
-            chartdown/packages/obsidian/dist/main.js
-            chartdown/packages/obsidian/dist/styles.css
-            chartdown/packages/obsidian/dist/manifest.json
+            main.js
+            styles.css
+            manifest.json
       - name: Release notes from this version's own changelog section
         run: |
           V="${{ steps.version.outputs.version }}"
@@ -124,8 +141,8 @@ jobs:
         run: |
           V="${{ steps.version.outputs.version }}"
           gh release create "$V" \
-            chartdown/packages/obsidian/dist/main.js \
-            chartdown/packages/obsidian/dist/manifest.json \
-            chartdown/packages/obsidian/dist/styles.css \
+            main.js \
+            manifest.json \
+            styles.css \
             --title "$V" \
             --notes-file notes.md
